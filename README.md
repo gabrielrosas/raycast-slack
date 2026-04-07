@@ -5,8 +5,13 @@ Quick launcher for Slack conversations directly from Raycast.
 ## Features
 
 - **Slack Conversations** — Search and open any Slack conversation (DMs, groups, public and private channels) directly in the Slack app.
+- **Slack Conversation Tags** — Create, edit and delete tags to organize your conversations. Assign multiple tags to any conversation.
 - **Slack Sync** — Background command that syncs conversations and users from Slack every 10 minutes, keeping the list always up to date.
-- Conversations are sorted by last used, so your most recent chats are always on top.
+- Fuzzy search across conversation names, topics and tags (accent and case insensitive, multi-term).
+- Filter conversations by tag via dropdown.
+- Conversations sorted by last used, so your most recent chats are always on top.
+- Detail panel for group DMs showing the list of members (toggle with `Cmd+D`).
+- Group DM names are sorted alphabetically and exclude the current user.
 
 ## Setup
 
@@ -26,9 +31,22 @@ Quick launcher for Slack conversations directly from Raycast.
 | Command | Description | Mode |
 |---------|-------------|------|
 | Slack Conversations | Search and open conversations | View |
-| Slack Sync | Sync conversations from Slack | Background (every 10min) |
+| Slack Conversation Tags | Create and manage tags for conversations | View |
+| Slack Sync | Sync conversations and users from Slack | Background (every 10min) |
 
-## Actions
+## Actions (Conversations)
 
-- **Ir** — Open conversation in Slack and close Raycast
-- **Ver** — Open conversation in Slack and keep Raycast suspended
+| Action | Shortcut | Description |
+|--------|----------|-------------|
+| Ir | `Enter` | Open conversation in Slack and close Raycast |
+| Ver | | Open conversation in Slack and keep Raycast suspended |
+| Show/Hide Members | `Cmd+D` | Toggle detail panel with group DM members |
+| Tags | `Cmd+T` | Add or remove tags from the conversation |
+
+## Actions (Tags)
+
+| Action | Shortcut | Description |
+|--------|----------|-------------|
+| Edit Tag | `Enter` | Edit tag name and color |
+| Delete Tag | `Cmd+Backspace` | Delete tag and remove from all conversations |
+| Create Tag | `Cmd+N` | Create a new tag |
