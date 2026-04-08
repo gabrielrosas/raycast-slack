@@ -1,7 +1,7 @@
 import { updateCommandMetadata, environment, LaunchType, showHUD, LocalStorage } from "@raycast/api";
 
 import { dayjs } from "./config/dayjs";
-import { getData, getCurrentUser, getConversationUnreadCount, Conversation } from "./common/requests";
+import { getData, getCurrentUser, getConversationUnreadCount } from "./common/requests";
 import { getFollowed, getIgnored, getTrackedIds } from "./common/follows";
 
 export default async function main() {
