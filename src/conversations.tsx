@@ -74,6 +74,60 @@ function MpimDetail({ conversation }: { conversation: Conversation }) {
   return <List.Item.Detail markdown={`## Members (${members.length})\n${members.map((m) => `- ${m}`).join("\n")}`} />;
 }
 
+type ConversationItemProps = {
+  conversation: Conversation;
+  showDetail: boolean;
+  setShowDetail: (v: boolean) => void;
+  convTags: Record<string, string[]>;
+  tagsById: Record<string, Tag>;
+  allTags: Tag[];
+  onOpen: (conversation: Conversation, notClose?: boolean) => void;
+  onToggleTag: (conversationId: string, tagId: string) => void;
+};
+
+function ConversationItem({ conversation, showDetail, setShowDetail, convTags, tagsById, allTags, onOpen, onToggleTag }: ConversationItemProps) {
+  return (
+    <List.Item
+      title={conversation.type === "mpim" && conversation.topic ? conversation.topic : conversation.name}
+      subtitle={!showDetail && conversation.type === "mpim" && conversation.topic ? conversation.name : undefined}
+      icon={{
+        source: conversation.image,
+        ...(conversation.type === "im" && { mask: Image.Mask.Circle }),
+        ...(conversation.type === "channel" && { tintColor: Color.Blue }),
+        ...(conversation.type === "private_channel" && { tintColor: Color.Red }),
+        ...(conversation.type === "mpim" && { tintColor: Color.Yellow }),
+      }}
+      accessories={showDetail ? [] : (convTags[conversation.id] || [])
+        .map((id) => tagsById[id])
+        .filter(Boolean)
+        .map((tag) => ({ tag: { value: tag.name, color: tag.color } }))}
+      detail={showDetail && conversation.type === "mpim" ? <MpimDetail conversation={conversation} /> : undefined}
+      actions={
+        <ActionPanel>
+          <Action title="Ir" icon={Icon.ArrowNe} onAction={() => onOpen(conversation)} />
+          <Action title="Ver" icon={Icon.Eye} onAction={() => onOpen(conversation, true)} />
+          <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          {allTags.length > 0 && (
+            <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["cmd"], key: "t" }}>
+              {allTags.map((tag) => {
+                const isActive = (convTags[conversation.id] || []).includes(tag.id);
+                return (
+                  <Action
+                    key={tag.id}
+                    title={`${isActive ? "Remove" : "Add"} "${tag.name}"`}
+                    icon={{ source: isActive ? Icon.CheckCircle : Icon.Circle, tintColor: tag.color }}
+                    onAction={() => onToggleTag(conversation.id, tag.id)}
+                  />
+                );
+              })}
+            </ActionPanel.Submenu>
+          )}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function Command() {
   const { data, isLoading } = usePromise(getConversations);
   const [state, setState] = useState<Record<string, Conversation>>();
@@ -166,45 +220,7 @@ export default function Command() {
       }
     >
       {conversations?.map((conversation) => (
-        <List.Item
-          key={conversation.id}
-          title={conversation.type === "mpim" && conversation.topic ? conversation.topic : conversation.name}
-          subtitle={!showDetail && conversation.type === "mpim" && conversation.topic ? conversation.name : undefined}
-          icon={{
-            source: conversation.image,
-            ...(conversation.type === "im" && { mask: Image.Mask.Circle }),
-            ...(conversation.type === "channel" && { tintColor: Color.Blue }),
-            ...(conversation.type === "private_channel" && { tintColor: Color.Red }),
-            ...(conversation.type === "mpim" && { tintColor: Color.Yellow }),
-          }}
-          accessories={showDetail ? [] : (convTags[conversation.id] || [])
-            .map((id) => tagsById[id])
-            .filter(Boolean)
-            .map((tag) => ({ tag: { value: tag.name, color: tag.color } }))}
-          detail={showDetail && conversation.type === "mpim" ? <MpimDetail conversation={conversation} /> : undefined}
-          actions={
-            <ActionPanel>
-              <Action title="Ir" icon={Icon.ArrowNe} onAction={() => handlerOpenConversation(conversation)} />
-              <Action title="Ver" icon={Icon.Eye} onAction={() => handlerOpenConversation(conversation, true)} />
-              <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-              {allTags && allTags.length > 0 && (
-                <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["cmd"], key: "t" }}>
-                  {allTags.map((tag) => {
-                    const isActive = (convTags[conversation.id] || []).includes(tag.id);
-                    return (
-                      <Action
-                        key={tag.id}
-                        title={`${isActive ? "Remove" : "Add"} "${tag.name}"`}
-                        icon={{ source: isActive ? Icon.CheckCircle : Icon.Circle, tintColor: tag.color }}
-                        onAction={() => handleToggleTag(conversation.id, tag.id)}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
-              )}
-            </ActionPanel>
-          }
-        />
+        <ConversationItem key={conversation.id} conversation={conversation} showDetail={showDetail} setShowDetail={setShowDetail} convTags={convTags} tagsById={tagsById} allTags={allTags || []} onOpen={handlerOpenConversation} onToggleTag={handleToggleTag} />
       ))}
     </List>
   );
