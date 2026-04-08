@@ -105,10 +105,10 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
       actions={
         <ActionPanel>
           <Action title="Ir" icon={Icon.ArrowNe} onAction={() => onOpen(conversation)} />
-          <Action title="Ver" icon={Icon.Eye} onAction={() => onOpen(conversation, true)} />
-          <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          <Action title="Ver" icon={Icon.Eye} shortcut={{ modifiers: ["opt"], key: "return" }} onAction={() => onOpen(conversation, true)} />
+          <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["opt"], key: "d" }} />
           {allTags.length > 0 && (
-            <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}>
+            <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["opt", "shift"], key: "t" }}>
               {allTags.map((tag) => {
                 const isActive = (convTags[conversation.id] || []).includes(tag.id);
                 return (
