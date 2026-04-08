@@ -108,7 +108,7 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
           <Action title="Ver" icon={Icon.Eye} onAction={() => onOpen(conversation, true)} />
           <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["cmd"], key: "d" }} />
           {allTags.length > 0 && (
-            <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["cmd"], key: "t" }}>
+            <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}>
               {allTags.map((tag) => {
                 const isActive = (convTags[conversation.id] || []).includes(tag.id);
                 return (
