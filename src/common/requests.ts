@@ -96,6 +96,50 @@ export async function getCurrentUser(): Promise<{ id: string; name: string; team
   return { id: response.data.user_id, name: response.data.user, team_id: response.data.team_id };
 }
 
+type GetConversationInfoResponse = {
+  ok: boolean;
+  channel: {
+    unread_count?: number;
+    unread_count_display?: number;
+    last_read?: string;
+  };
+};
+
+type GetHistoryResponse = {
+  ok: boolean;
+  messages: { ts: string }[];
+};
+
+export async function getConversationUnreadCount(channelId: string): Promise<{ unreadCount: number } | null> {
+  try {
+    const infoResponse = await axios.get<GetConversationInfoResponse>("https://slack.com/api/conversations.info", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { channel: channelId },
+    });
+    const ch = infoResponse.data.channel;
+
+    // DMs return unread_count directly
+    if (ch.unread_count !== undefined) {
+      return { unreadCount: ch.unread_count_display ?? ch.unread_count };
+    }
+
+    // For channels: check if there are messages after last_read
+    if (!ch.last_read) return { unreadCount: 0 };
+
+    const historyResponse = await axios.get<GetHistoryResponse>("https://slack.com/api/conversations.history", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { channel: channelId, oldest: ch.last_read, limit: 100 },
+    });
+
+    // Exclude the message at exactly last_read timestamp
+    const unread = (historyResponse.data.messages || []).filter((m) => m.ts !== ch.last_read);
+    return { unreadCount: unread.length };
+  } catch (error) {
+    console.error(`[info] Error fetching ${channelId}:`, error);
+    return null;
+  }
+}
+
 export type Conversation = {
   id: string;
   url: string;
@@ -104,6 +148,7 @@ export type Conversation = {
   image: string;
   lastUsed?: number | null;
   topic?: string;
+  unreadCount?: number;
 };
 
 export async function getData(lastData: Record<string, Conversation> = {}, currentUserId?: string) {
@@ -160,6 +205,7 @@ export async function getData(lastData: Record<string, Conversation> = {}, curre
               image: user.image_original,
               lastUsed: lastData[conversation.id]?.lastUsed || null,
               topic: conversation.topic?.value || undefined,
+              unreadCount: lastData[conversation.id]?.unreadCount ?? 0,
             },
           };
         }
@@ -176,6 +222,7 @@ export async function getData(lastData: Record<string, Conversation> = {}, curre
             image: conversation.is_private ? Icon.Lock : Icon.Hashtag,
             lastUsed: lastData[conversation.id]?.lastUsed || null,
             topic: conversation.topic?.value || undefined,
+            unreadCount: lastData[conversation.id]?.unreadCount ?? 0,
           },
         };
       }
@@ -190,6 +237,7 @@ export async function getData(lastData: Record<string, Conversation> = {}, curre
             image: Icon.TwoPeople,
             lastUsed: lastData[conversation.id]?.lastUsed || null,
             topic: conversation.topic?.value || undefined,
+            unreadCount: lastData[conversation.id]?.unreadCount ?? 0,
           },
         };
       }

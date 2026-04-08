@@ -25,6 +25,13 @@
       "mode": "view"
     },
     {
+      "name": "unread",
+      "title": "Slack Following",
+      "description": "Followed conversations with unread tracking",
+      "icon": "conversations-icon.png",
+      "mode": "view"
+    },
+    {
       "name": "tags",
       "title": "Slack Conversation Tags",
       "description": "Create and manage tags for Slack conversations",
