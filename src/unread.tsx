@@ -16,6 +16,7 @@ import { runAppleScript } from "run-applescript";
 import { usePromise } from "@raycast/utils";
 import { Conversation, getConversationUnreadCount } from "./common/requests";
 import { toggleIgnore, toggleFollow, getFollowed, getIgnored, getTrackedIds } from "./common/follows";
+import { openSlackUnreads } from "./common/slack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 async function loadConversations(): Promise<Record<string, Conversation>> {
@@ -146,6 +147,7 @@ export default function Command() {
             <ActionPanel>
               <Action title="Follow from Clipboard" icon={Icon.Clipboard} shortcut={{ modifiers: ["opt", "shift"], key: "f" }} onAction={handleFollowFromClipboard} />
               <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={handleRefresh} />
+              <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
             </ActionPanel>
           }
         />
@@ -237,6 +239,7 @@ function UnreadItem({ conversation, isFollowed, onOpen, onMarkAsRead, onMarkAllR
           <Action title="Ignore" icon={Icon.XMarkCircle} shortcut={{ modifiers: ["opt"], key: "i" }} onAction={() => onToggleIgnore(conversation.id)} />
           <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={onRefresh} />
           <Action title="Follow from Clipboard" icon={Icon.Clipboard} shortcut={{ modifiers: ["opt", "shift"], key: "f" }} onAction={onFollowFromClipboard} />
+          <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
         </ActionPanel>
       }
     />

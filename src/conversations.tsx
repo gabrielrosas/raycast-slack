@@ -14,6 +14,7 @@ import { usePromise } from "@raycast/utils";
 import { Conversation } from "./common/requests";
 import { Tag, getTags, getConversationTags, toggleTagOnConversation } from "./common/tags";
 import { getFollowed, toggleFollow, getIgnored, toggleIgnore } from "./common/follows";
+import { openSlackUnreads } from "./common/slack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function normalize(text: string): string {
@@ -27,7 +28,7 @@ function scoreMatch(query: string, conversation: Conversation, tagNames: string[
   if (!query) return 0;
 
   const terms = normalize(query).split(/\s+/).filter(Boolean);
-  const fields = [conversation.name, conversation.topic || "", ...tagNames].map(normalize);
+  const fields = [conversation.name, conversation.topic || "", conversation.id, ...tagNames].map(normalize);
   const joined = fields.join(" ");
 
   let score = 0;
@@ -143,6 +144,7 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
               })}
             </ActionPanel.Submenu>
           )}
+          <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
         </ActionPanel>
       }
     />
