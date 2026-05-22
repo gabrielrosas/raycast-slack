@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, Color, useNavigation, Form } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { Tag, TAG_COLORS, getTags, saveTags, deleteTag } from "./common/tags";
+import { Tag, TAG_COLORS, getTags, saveTags, deleteTag } from "./common/storage/tags";
 
 function CreateTag({ onCreated }: { onCreated: () => void }) {
   const { pop } = useNavigation();
@@ -29,7 +29,12 @@ function CreateTag({ onCreated }: { onCreated: () => void }) {
       <Form.TextField id="name" title="Name" placeholder="e.g. Work, Personal, Urgent..." />
       <Form.Dropdown id="color" title="Color" defaultValue={Color.Blue}>
         {TAG_COLORS.map((c) => (
-          <Form.Dropdown.Item key={c.value} value={c.value} title={c.name} icon={{ source: Icon.Circle, tintColor: c.value }} />
+          <Form.Dropdown.Item
+            key={c.value}
+            value={c.value}
+            title={c.name}
+            icon={{ source: Icon.Circle, tintColor: c.value }}
+          />
         ))}
       </Form.Dropdown>
     </Form>
@@ -41,7 +46,9 @@ function EditTag({ tag, onEdited }: { tag: Tag; onEdited: () => void }) {
 
   async function handleSubmit(values: { name: string; color: string }) {
     const tags = await getTags();
-    const updated = tags.map((t) => (t.id === tag.id ? { ...t, name: values.name.trim(), color: values.color as Color } : t));
+    const updated = tags.map((t) =>
+      t.id === tag.id ? { ...t, name: values.name.trim(), color: values.color as Color } : t,
+    );
     await saveTags(updated);
     onEdited();
     pop();
@@ -58,7 +65,12 @@ function EditTag({ tag, onEdited }: { tag: Tag; onEdited: () => void }) {
       <Form.TextField id="name" title="Name" defaultValue={tag.name} />
       <Form.Dropdown id="color" title="Color" defaultValue={tag.color}>
         {TAG_COLORS.map((c) => (
-          <Form.Dropdown.Item key={c.value} value={c.value} title={c.name} icon={{ source: Icon.Circle, tintColor: c.value }} />
+          <Form.Dropdown.Item
+            key={c.value}
+            value={c.value}
+            title={c.name}
+            icon={{ source: Icon.Circle, tintColor: c.value }}
+          />
         ))}
       </Form.Dropdown>
     </Form>
@@ -94,7 +106,12 @@ export default function Command() {
                   refresh();
                 }}
               />
-              <Action.Push title="Create Tag" icon={Icon.Plus} target={<CreateTag onCreated={refresh} />} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+              <Action.Push
+                title="Create Tag"
+                icon={Icon.Plus}
+                target={<CreateTag onCreated={refresh} />}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
             </ActionPanel>
           }
         />

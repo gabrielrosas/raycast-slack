@@ -14,8 +14,9 @@ import {
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { usePromise } from "@raycast/utils";
-import { Conversation, getConversationUnreadCount } from "./common/requests";
-import { toggleIgnore, toggleFollow, getFollowed, getIgnored, getTrackedIds } from "./common/follows";
+import { Conversation } from "./common/api/types";
+import { getConversationUnreadCount } from "./common/api/conversations";
+import { toggleIgnore, toggleFollow, getFollowed, getIgnored, getTrackedIds } from "./common/storage/follows";
 import { openSlackUnreads } from "./common/slack";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -145,9 +146,24 @@ export default function Command() {
           description="Tudo em dia!"
           actions={
             <ActionPanel>
-              <Action title="Follow from Clipboard" icon={Icon.Clipboard} shortcut={{ modifiers: ["opt", "shift"], key: "f" }} onAction={handleFollowFromClipboard} />
-              <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={handleRefresh} />
-              <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
+              <Action
+                title="Follow from Clipboard"
+                icon={Icon.Clipboard}
+                shortcut={{ modifiers: ["opt", "shift"], key: "f" }}
+                onAction={handleFollowFromClipboard}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={handleRefresh}
+              />
+              <Action
+                title="Open Unreads"
+                icon={Icon.Tray}
+                shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
+                onAction={openSlackUnreads}
+              />
             </ActionPanel>
           }
         />
@@ -164,7 +180,10 @@ export default function Command() {
               onMarkAsRead={handleMarkAsRead}
               onMarkAllRead={handleMarkAllRead}
               onToggleFollow={async (id) => setFollowed(await toggleFollow(id))}
-              onToggleIgnore={async (id) => { await toggleIgnore(id); await handleMarkAsRead(id); }}
+              onToggleIgnore={async (id) => {
+                await toggleIgnore(id);
+                await handleMarkAsRead(id);
+              }}
               onRefresh={handleRefresh}
               onFollowFromClipboard={handleFollowFromClipboard}
             />
@@ -183,7 +202,10 @@ export default function Command() {
               onMarkAsRead={handleMarkAsRead}
               onMarkAllRead={handleMarkAllRead}
               onToggleFollow={async (id) => setFollowed(await toggleFollow(id))}
-              onToggleIgnore={async (id) => { await toggleIgnore(id); await handleMarkAsRead(id); }}
+              onToggleIgnore={async (id) => {
+                await toggleIgnore(id);
+                await handleMarkAsRead(id);
+              }}
               onRefresh={handleRefresh}
               onFollowFromClipboard={handleFollowFromClipboard}
             />
@@ -207,7 +229,17 @@ type UnreadItemProps = {
   onFollowFromClipboard: () => void;
 };
 
-function UnreadItem({ conversation, isFollowed, onOpen, onMarkAsRead, onMarkAllRead, onToggleFollow, onToggleIgnore, onRefresh, onFollowFromClipboard }: UnreadItemProps) {
+function UnreadItem({
+  conversation,
+  isFollowed,
+  onOpen,
+  onMarkAsRead,
+  onMarkAllRead,
+  onToggleFollow,
+  onToggleIgnore,
+  onRefresh,
+  onFollowFromClipboard,
+}: UnreadItemProps) {
   const count = conversation.unreadCount || 0;
 
   return (
@@ -228,18 +260,48 @@ function UnreadItem({ conversation, isFollowed, onOpen, onMarkAsRead, onMarkAllR
       actions={
         <ActionPanel>
           <Action title="Open" icon={Icon.ArrowNe} onAction={() => onOpen(conversation)} />
-          <Action title="Mark as Read" icon={Icon.Check} shortcut={{ modifiers: ["opt"], key: "r" }} onAction={() => onMarkAsRead(conversation.id)} />
-          <Action title="Mark All as Read" icon={Icon.CheckCircle} shortcut={{ modifiers: ["cmd", "shift"], key: "r" }} onAction={onMarkAllRead} />
+          <Action
+            title="Mark as Read"
+            icon={Icon.Check}
+            shortcut={{ modifiers: ["opt"], key: "r" }}
+            onAction={() => onMarkAsRead(conversation.id)}
+          />
+          <Action
+            title="Mark All as Read"
+            icon={Icon.CheckCircle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            onAction={onMarkAllRead}
+          />
           <Action
             title={isFollowed ? "Unfollow" : "Follow"}
             icon={isFollowed ? Icon.EyeDisabled : Icon.Eye}
             shortcut={{ modifiers: ["opt"], key: "f" }}
             onAction={() => onToggleFollow(conversation.id)}
           />
-          <Action title="Ignore" icon={Icon.XMarkCircle} shortcut={{ modifiers: ["opt"], key: "i" }} onAction={() => onToggleIgnore(conversation.id)} />
-          <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={onRefresh} />
-          <Action title="Follow from Clipboard" icon={Icon.Clipboard} shortcut={{ modifiers: ["opt", "shift"], key: "f" }} onAction={onFollowFromClipboard} />
-          <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
+          <Action
+            title="Ignore"
+            icon={Icon.XMarkCircle}
+            shortcut={{ modifiers: ["opt"], key: "i" }}
+            onAction={() => onToggleIgnore(conversation.id)}
+          />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={onRefresh}
+          />
+          <Action
+            title="Follow from Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["opt", "shift"], key: "f" }}
+            onAction={onFollowFromClipboard}
+          />
+          <Action
+            title="Open Unreads"
+            icon={Icon.Tray}
+            shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
+            onAction={openSlackUnreads}
+          />
         </ActionPanel>
       }
     />

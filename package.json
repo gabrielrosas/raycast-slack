@@ -14,6 +14,24 @@
       "type": "password",
       "required": true,
       "placeholder": "xoxp-..."
+    },
+    {
+      "name": "defaultLanguage",
+      "title": "Default Language",
+      "description": "Idioma usado por Summarize with AI e Translate with AI.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Portuguese (Brazil)",
+      "data": [
+        { "title": "Portuguese (BR)", "value": "Portuguese (Brazil)" },
+        { "title": "English", "value": "English" },
+        { "title": "Spanish", "value": "Spanish" },
+        { "title": "French", "value": "French" },
+        { "title": "German", "value": "German" },
+        { "title": "Italian", "value": "Italian" },
+        { "title": "Japanese", "value": "Japanese" },
+        { "title": "Chinese (Simplified)", "value": "Chinese (Simplified)" }
+      ]
     }
   ],
   "commands": [
@@ -36,6 +54,13 @@
       "title": "Slack Conversation Tags",
       "description": "Create and manage tags for Slack conversations",
       "icon": "tags-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "messages",
+      "title": "Slack Show Messages",
+      "description": "Show messages from a Slack thread or channel — paste a URL or launch from Slack Conversations",
+      "icon": "conversations-icon.png",
       "mode": "view"
     },
     {

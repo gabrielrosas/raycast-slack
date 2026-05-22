@@ -37,7 +37,10 @@ export async function saveConversationTags(mapping: Record<string, string[]>): P
   await LocalStorage.setItem(CONVERSATION_TAGS_KEY, JSON.stringify(mapping));
 }
 
-export async function toggleTagOnConversation(conversationId: string, tagId: string): Promise<Record<string, string[]>> {
+export async function toggleTagOnConversation(
+  conversationId: string,
+  tagId: string,
+): Promise<Record<string, string[]>> {
   const mapping = await getConversationTags();
   const current = mapping[conversationId] || [];
 

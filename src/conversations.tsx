@@ -11,11 +11,12 @@ import {
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { usePromise } from "@raycast/utils";
-import { Conversation } from "./common/requests";
-import { Tag, getTags, getConversationTags, toggleTagOnConversation } from "./common/tags";
-import { getFollowed, toggleFollow, getIgnored, toggleIgnore } from "./common/follows";
+import { Conversation } from "./common/api/types";
+import { Tag, getTags, getConversationTags, toggleTagOnConversation } from "./common/storage/tags";
+import { getFollowed, toggleFollow, getIgnored, toggleIgnore } from "./common/storage/follows";
 import { openSlackUnreads } from "./common/slack";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import RangeForm from "./components/range-form";
 
 function normalize(text: string): string {
   return text
@@ -91,7 +92,20 @@ type ConversationItemProps = {
   onToggleIgnore: (conversationId: string) => void;
 };
 
-function ConversationItem({ conversation, showDetail, setShowDetail, convTags, tagsById, allTags, isFollowed, isIgnored, onOpen, onToggleTag, onToggleFollow, onToggleIgnore }: ConversationItemProps) {
+function ConversationItem({
+  conversation,
+  showDetail,
+  setShowDetail,
+  convTags,
+  tagsById,
+  allTags,
+  isFollowed,
+  isIgnored,
+  onOpen,
+  onToggleTag,
+  onToggleFollow,
+  onToggleIgnore,
+}: ConversationItemProps) {
   return (
     <List.Item
       title={conversation.type === "mpim" && conversation.topic ? conversation.topic : conversation.name}
@@ -103,20 +117,34 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
         ...(conversation.type === "private_channel" && { tintColor: Color.Red }),
         ...(conversation.type === "mpim" && { tintColor: Color.Yellow }),
       }}
-      accessories={showDetail ? [] : [
-        ...(isFollowed ? [{ icon: { source: Icon.Eye, tintColor: Color.Green } }] : []),
-        ...(isIgnored ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.SecondaryText } }] : []),
-        ...(convTags[conversation.id] || [])
-          .map((id) => tagsById[id])
-          .filter(Boolean)
-          .map((tag) => ({ tag: { value: tag.name, color: tag.color } })),
-      ]}
+      accessories={
+        showDetail
+          ? []
+          : [
+              ...(isFollowed ? [{ icon: { source: Icon.Eye, tintColor: Color.Green } }] : []),
+              ...(isIgnored ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.SecondaryText } }] : []),
+              ...(convTags[conversation.id] || [])
+                .map((id) => tagsById[id])
+                .filter(Boolean)
+                .map((tag) => ({ tag: { value: tag.name, color: tag.color } })),
+            ]
+      }
       detail={showDetail && conversation.type === "mpim" ? <MpimDetail conversation={conversation} /> : undefined}
       actions={
         <ActionPanel>
           <Action title="Ir" icon={Icon.ArrowNe} onAction={() => onOpen(conversation)} />
-          <Action title="Ver" icon={Icon.Eye} shortcut={{ modifiers: ["opt"], key: "return" }} onAction={() => onOpen(conversation, true)} />
-          <Action title={showDetail ? "Hide Members" : "Show Members"} icon={Icon.Sidebar} onAction={() => setShowDetail(!showDetail)} shortcut={{ modifiers: ["opt"], key: "d" }} />
+          <Action
+            title="Ver"
+            icon={Icon.Eye}
+            shortcut={{ modifiers: ["opt"], key: "return" }}
+            onAction={() => onOpen(conversation, true)}
+          />
+          <Action
+            title={showDetail ? "Hide Members" : "Show Members"}
+            icon={Icon.Sidebar}
+            onAction={() => setShowDetail(!showDetail)}
+            shortcut={{ modifiers: ["opt"], key: "d" }}
+          />
           <Action
             title={isFollowed ? "Unfollow" : "Follow"}
             icon={isFollowed ? Icon.EyeDisabled : Icon.Eye}
@@ -128,6 +156,19 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
             icon={isIgnored ? Icon.Undo : Icon.XMarkCircle}
             shortcut={{ modifiers: ["opt"], key: "i" }}
             onAction={() => onToggleIgnore(conversation.id)}
+          />
+          <Action.Push
+            title="Show Messages"
+            icon={Icon.Bubble}
+            shortcut={{ modifiers: ["opt"], key: "m" }}
+            target={
+              <RangeForm
+                channelId={conversation.id}
+                originalUrl={conversation.url}
+                channelName={conversation.name}
+                channelIsPrivate={conversation.type !== "channel"}
+              />
+            }
           />
           {allTags.length > 0 && (
             <ActionPanel.Submenu title="Tags" icon={Icon.Tag} shortcut={{ modifiers: ["opt", "shift"], key: "t" }}>
@@ -144,7 +185,12 @@ function ConversationItem({ conversation, showDetail, setShowDetail, convTags, t
               })}
             </ActionPanel.Submenu>
           )}
-          <Action title="Open Unreads" icon={Icon.Tray} shortcut={{ modifiers: ["opt", "shift"], key: "a" }} onAction={openSlackUnreads} />
+          <Action
+            title="Open Unreads"
+            icon={Icon.Tray}
+            shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
+            onAction={openSlackUnreads}
+          />
         </ActionPanel>
       }
     />
@@ -198,26 +244,17 @@ export default function Command() {
     [convTags, tagsById],
   );
 
-  const handleToggleTag = useCallback(
-    async (conversationId: string, tagId: string) => {
-      setConvTags(await toggleTagOnConversation(conversationId, tagId));
-    },
-    [],
-  );
+  const handleToggleTag = useCallback(async (conversationId: string, tagId: string) => {
+    setConvTags(await toggleTagOnConversation(conversationId, tagId));
+  }, []);
 
-  const handleToggleFollow = useCallback(
-    async (conversationId: string) => {
-      setFollowed(await toggleFollow(conversationId));
-    },
-    [],
-  );
+  const handleToggleFollow = useCallback(async (conversationId: string) => {
+    setFollowed(await toggleFollow(conversationId));
+  }, []);
 
-  const handleToggleIgnore = useCallback(
-    async (conversationId: string) => {
-      setIgnored(await toggleIgnore(conversationId));
-    },
-    [],
-  );
+  const handleToggleIgnore = useCallback(async (conversationId: string) => {
+    setIgnored(await toggleIgnore(conversationId));
+  }, []);
 
   const conversations = useMemo(() => {
     if (!state) return null;
@@ -253,7 +290,12 @@ export default function Command() {
             <List.Dropdown.Item title="All" value="all" />
             <List.Dropdown.Section title="Tags">
               {allTags.map((tag) => (
-                <List.Dropdown.Item key={tag.id} title={tag.name} value={tag.id} icon={{ source: Icon.Tag, tintColor: tag.color }} />
+                <List.Dropdown.Item
+                  key={tag.id}
+                  title={tag.name}
+                  value={tag.id}
+                  icon={{ source: Icon.Tag, tintColor: tag.color }}
+                />
               ))}
             </List.Dropdown.Section>
           </List.Dropdown>
@@ -261,7 +303,21 @@ export default function Command() {
       }
     >
       {conversations?.map((conversation) => (
-        <ConversationItem key={conversation.id} conversation={conversation} showDetail={showDetail} setShowDetail={setShowDetail} convTags={convTags} tagsById={tagsById} allTags={allTags || []} isFollowed={followed.includes(conversation.id)} isIgnored={ignored.includes(conversation.id)} onOpen={handlerOpenConversation} onToggleTag={handleToggleTag} onToggleFollow={handleToggleFollow} onToggleIgnore={handleToggleIgnore} />
+        <ConversationItem
+          key={conversation.id}
+          conversation={conversation}
+          showDetail={showDetail}
+          setShowDetail={setShowDetail}
+          convTags={convTags}
+          tagsById={tagsById}
+          allTags={allTags || []}
+          isFollowed={followed.includes(conversation.id)}
+          isIgnored={ignored.includes(conversation.id)}
+          onOpen={handlerOpenConversation}
+          onToggleTag={handleToggleTag}
+          onToggleFollow={handleToggleFollow}
+          onToggleIgnore={handleToggleIgnore}
+        />
       ))}
     </List>
   );

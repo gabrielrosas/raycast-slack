@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { Conversation } from "./requests";
+import { Conversation } from "../api/types";
 
 const MAX_TRACKED = 25;
 
@@ -58,9 +58,7 @@ export function getTrackedIds(
 
 export async function toggleIgnore(conversationId: string): Promise<string[]> {
   const ids = await getIgnored();
-  const updated = ids.includes(conversationId)
-    ? ids.filter((id) => id !== conversationId)
-    : [...ids, conversationId];
+  const updated = ids.includes(conversationId) ? ids.filter((id) => id !== conversationId) : [...ids, conversationId];
   await saveIgnored(updated);
   return updated;
 }

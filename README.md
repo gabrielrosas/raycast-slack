@@ -23,7 +23,9 @@ Quick launcher for Slack conversations directly from Raycast.
 
 1. Go to [Slack API Apps](https://api.slack.com/apps)
 2. Create a new app or select an existing one
-3. Under **OAuth & Permissions**, add the required scopes: `channels:read`, `groups:read`, `im:read`, `mpim:read`, `users:read`
+3. Under **OAuth & Permissions**, add the required scopes:
+   - List/sync: `channels:read`, `groups:read`, `im:read`, `mpim:read`, `users:read`
+   - Read messages (used by unread tracking and the Show Messages command): `channels:history`, `groups:history`, `im:history`, `mpim:history`
 4. Install the app to your workspace and copy the **User OAuth Token** (`xoxp-...`)
 
 ## Commands
@@ -32,6 +34,7 @@ Quick launcher for Slack conversations directly from Raycast.
 |---------|-------------|------|
 | Slack Conversations | Search and open conversations | View |
 | Slack Conversation Tags | Create and manage tags for conversations | View |
+| Slack Show Messages | Show messages from a Slack thread or channel — paste URL or launch from Conversations | View |
 | Slack Sync | Sync conversations and users from Slack | Background (every 10min) |
 
 ## Actions (Conversations)

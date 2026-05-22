@@ -1,8 +1,10 @@
 import { updateCommandMetadata, environment, LaunchType, showHUD, LocalStorage } from "@raycast/api";
 
 import { dayjs } from "./config/dayjs";
-import { getData, getCurrentUser, getConversationUnreadCount } from "./common/requests";
-import { getFollowed, getIgnored, getTrackedIds } from "./common/follows";
+import { getData } from "./common/api/data";
+import { getCurrentUser } from "./common/api/users";
+import { getConversationUnreadCount } from "./common/api/conversations";
+import { getFollowed, getIgnored, getTrackedIds } from "./common/storage/follows";
 
 export default async function main() {
   console.log("launchType", environment.launchType);
@@ -16,7 +18,9 @@ export default async function main() {
 
   await LocalStorage.setItem("currentUser", JSON.stringify(currentUser));
 
-  const { stats, conversations } = await getData(lastData ? JSON.parse(lastData) : {}, currentUser.id);
+  const { stats, conversations, users } = await getData(lastData ? JSON.parse(lastData) : {}, currentUser.id);
+
+  await LocalStorage.setItem("users", JSON.stringify(users));
 
   // Determine which conversations to check for unread
   const trackedIds = getTrackedIds(conversations, followed, ignored);
