@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/ap
 import { writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import AskAi from "./ask-ai";
 import Summary from "./summary";
 import Translate from "./translate";
 
@@ -35,6 +36,12 @@ export default function MessagesDetail({ markdown, filenameStem, summaryKey, cha
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             onAction={handleExport}
+          />
+          <Action.Push
+            title="Ask AI"
+            icon={Icon.QuestionMark}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            target={<AskAi markdown={markdown} />}
           />
           <Action.Push
             title="Translate with AI"
