@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, LaunchProps, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { SlackApiError } from "./common/api/client";
 import { fetchAndBuildThread } from "./common/flows";
 import { ParsedChannelUrl, ParsedSlackUrl, ParsedThreadUrl, parseSlackMessageUrl } from "./common/slack-url";
 import MessagesDetail from "./components/messages-detail";
-import RangeForm from "./components/range-form";
+import RangePicker from "./components/range-picker";
 
 const ERROR_HINTS: Record<string, string> = {
   not_in_channel: "Você não é membro deste canal.",
@@ -34,13 +34,14 @@ type State =
   | { kind: "channel"; parsed: ParsedChannelUrl }
   | { kind: "error"; message: string; parsed?: ParsedSlackUrl };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: { url?: string } }>) {
   const [state, setState] = useState<State>({ kind: "loading" });
 
   const load = async () => {
     setState({ kind: "loading" });
-    const clipboard = await Clipboard.readText();
-    const parsed = parseSlackMessageUrl(clipboard ?? "");
+    const fromContext = props.launchContext?.url;
+    const candidate = fromContext ?? (await Clipboard.readText()) ?? "";
+    const parsed = parseSlackMessageUrl(candidate);
     if (!parsed) return setState({ kind: "empty" });
 
     if (parsed.kind === "channel") {
@@ -95,7 +96,7 @@ export default function Command() {
   }
 
   if (state.kind === "channel") {
-    return <RangeForm channelId={state.parsed.channelId} originalUrl={state.parsed.originalUrl} />;
+    return <RangePicker channelId={state.parsed.channelId} originalUrl={state.parsed.originalUrl} />;
   }
 
   const { parsed, markdown } = state;

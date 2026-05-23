@@ -4,7 +4,7 @@
   "title": "Slack",
   "description": "Quick launcher for Slack conversations directly from Raycast",
   "icon": "extension-icon.png",
-  "author": "Gabriel Rosas",
+  "author": "gabriel-rosas",
   "license": "MIT",
   "preferences": [
     {

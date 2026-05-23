@@ -1,5 +1,6 @@
 import { dayjs } from "../../config/dayjs";
 import type { SlackMessage, UserInfo } from "../api/types";
+import { messagePermalink, showMessagesQuicklink } from "../workspace";
 import { mrkdwnToMarkdown } from "./mrkdwn";
 import { blocksToMarkdown, hasRichText } from "./blocks";
 import { renderEmojiName } from "./emoji";
@@ -18,6 +19,13 @@ function authorName(message: SlackMessage, users: Record<string, UserInfo>): str
   if (message.bot_id) return `bot:${message.bot_id}`;
   if (message.user) return message.user;
   return "unknown";
+}
+
+function authorAvatar(message: SlackMessage, users: Record<string, UserInfo>): string | undefined {
+  const url = message.user ? users[message.user]?.image : undefined;
+  if (!url) return undefined;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}raycast-width=20&raycast-height=20`;
 }
 
 function formatReactions(message: SlackMessage): string | null {
@@ -45,9 +53,10 @@ function renderMessage(
   m: SlackMessage,
   users: Record<string, UserInfo>,
   userResolver: (id: string) => string | undefined,
-  options: { showThreadIndicator?: boolean } = {},
+  options: { showThreadIndicator?: boolean; channelId?: string; workspaceUrl?: string } = {},
 ): string {
   const author = authorName(m, users);
+  const avatar = authorAvatar(m, users);
   const date = formatTs(m.ts);
   const text = (
     hasRichText(m.blocks) ? blocksToMarkdown(m.blocks, userResolver) : mrkdwnToMarkdown(m.text, userResolver)
@@ -55,9 +64,20 @@ function renderMessage(
   const reactions = formatReactions(m);
   const files = formatFiles(m);
 
-  const headerExtra = options.showThreadIndicator && (m.reply_count ?? 0) > 0 ? ` · 💬 ${m.reply_count} respostas` : "";
+  let headerExtra = "";
+  if (options.showThreadIndicator && (m.reply_count ?? 0) > 0) {
+    const label = `💬 ${m.reply_count} respostas`;
+    if (options.workspaceUrl && options.channelId) {
+      const permalink = messagePermalink(options.workspaceUrl, options.channelId, m.ts);
+      const quicklink = showMessagesQuicklink(permalink);
+      headerExtra = ` · [${label}](${quicklink})`;
+    } else {
+      headerExtra = ` · ${label}`;
+    }
+  }
 
-  const parts = [`**${author}** · ${date}${headerExtra}`, "", text || "_(sem texto)_"];
+  const avatarTag = avatar ? `![](${avatar}) ` : "";
+  const parts = [`${avatarTag}**${author}** · ${date}${headerExtra}`, "", text || "_(sem texto)_"];
   if (files) parts.push("", files);
   if (reactions) parts.push("", reactions);
   return parts.join("\n");
@@ -69,6 +89,8 @@ export type BuildThreadInput = {
   channelIsPrivate?: boolean;
   originalUrl: string;
   users: Record<string, UserInfo>;
+  channelId?: string;
+  workspaceUrl?: string;
 };
 
 export function buildThreadMarkdown({
@@ -77,6 +99,8 @@ export function buildThreadMarkdown({
   channelIsPrivate,
   originalUrl,
   users,
+  channelId,
+  workspaceUrl,
 }: BuildThreadInput): string {
   const visible = messages.filter((m) => !m.subtype || !SKIP_SUBTYPES.has(m.subtype));
   const userResolver = (id: string) => users[id]?.name;
@@ -94,7 +118,9 @@ export function buildThreadMarkdown({
     "",
   ].join("\n");
 
-  const body = visible.map((m) => renderMessage(m, users, userResolver)).join("\n\n---\n\n");
+  const body = visible
+    .map((m) => renderMessage(m, users, userResolver, { channelId, workspaceUrl }))
+    .join("\n\n---\n\n");
 
   return `${header}${body}\n`;
 }
@@ -107,6 +133,8 @@ export type BuildChannelInput = {
   users: Record<string, UserInfo>;
   rangeLabel: string;
   truncated: boolean;
+  channelId?: string;
+  workspaceUrl?: string;
 };
 
 export function buildChannelMarkdown({
@@ -117,6 +145,8 @@ export function buildChannelMarkdown({
   users,
   rangeLabel,
   truncated,
+  channelId,
+  workspaceUrl,
 }: BuildChannelInput): string {
   const visible = messages
     .filter((m) => !m.subtype || !SKIP_SUBTYPES.has(m.subtype))
@@ -140,7 +170,7 @@ export function buildChannelMarkdown({
   const header = headerLines.join("\n");
 
   const body = visible
-    .map((m) => renderMessage(m, users, userResolver, { showThreadIndicator: true }))
+    .map((m) => renderMessage(m, users, userResolver, { showThreadIndicator: true, channelId, workspaceUrl }))
     .join("\n\n---\n\n");
 
   return `${header}${body}\n`;

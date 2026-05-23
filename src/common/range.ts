@@ -5,14 +5,6 @@ export type RangeType = "24h" | "7d" | "30d" | "unread" | "custom";
 
 export type ComputedRange = { oldest?: string; latest?: string };
 
-export const RANGE_OPTIONS: { value: RangeType; title: string }[] = [
-  { value: "unread", title: "Não lidas" },
-  { value: "24h", title: "Últimas 24h" },
-  { value: "7d", title: "Últimos 7 dias" },
-  { value: "30d", title: "Últimos 30 dias" },
-  { value: "custom", title: "Customizado" },
-];
-
 export function rangeLabelFor(type: RangeType, oldest?: string, latest?: string): string {
   switch (type) {
     case "24h":

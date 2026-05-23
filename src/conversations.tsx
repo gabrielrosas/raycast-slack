@@ -16,7 +16,7 @@ import { Tag, getTags, getConversationTags, toggleTagOnConversation } from "./co
 import { getFollowed, toggleFollow, getIgnored, toggleIgnore } from "./common/storage/follows";
 import { openSlackUnreads } from "./common/slack";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import RangeForm from "./components/range-form";
+import RangePicker from "./components/range-picker";
 
 function normalize(text: string): string {
   return text
@@ -162,7 +162,7 @@ function ConversationItem({
             icon={Icon.Bubble}
             shortcut={{ modifiers: ["opt"], key: "m" }}
             target={
-              <RangeForm
+              <RangePicker
                 channelId={conversation.id}
                 originalUrl={conversation.url}
                 channelName={conversation.name}

@@ -30,9 +30,20 @@ export async function getUsers(cursor?: string): Promise<RawUser[]> {
   return response.data.members;
 }
 
-export async function getCurrentUser(): Promise<{ id: string; name: string; team_id: string }> {
-  const response = await slackAxios.get<{ ok: boolean; user_id: string; user: string; team_id: string }>("/auth.test");
-  return { id: response.data.user_id, name: response.data.user, team_id: response.data.team_id };
+export async function getCurrentUser(): Promise<{ id: string; name: string; team_id: string; url: string }> {
+  const response = await slackAxios.get<{
+    ok: boolean;
+    user_id: string;
+    user: string;
+    team_id: string;
+    url: string;
+  }>("/auth.test");
+  return {
+    id: response.data.user_id,
+    name: response.data.user,
+    team_id: response.data.team_id,
+    url: response.data.url,
+  };
 }
 
 export function buildUserDirectory(users: RawUser[]): Record<string, UserInfo> {

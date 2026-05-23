@@ -2,6 +2,7 @@ import { getChannelMessages, getThreadReplies } from "./api/messages";
 import { buildChannelMarkdown, buildThreadMarkdown } from "./markdown/builder";
 import { ComputedRange } from "./range";
 import { loadAndEnrichUsers, resolveChannelName } from "./user-resolver";
+import { resolveWorkspaceUrl } from "./workspace";
 
 export type ThreadResult = { markdown: string; messageCount: number };
 
@@ -11,7 +12,11 @@ export async function fetchAndBuildThread(
   originalUrl: string,
 ): Promise<ThreadResult> {
   const messages = await getThreadReplies(channelId, threadTs);
-  const [users, channel] = await Promise.all([loadAndEnrichUsers(messages), resolveChannelName(channelId)]);
+  const [users, channel, workspaceUrl] = await Promise.all([
+    loadAndEnrichUsers(messages),
+    resolveChannelName(channelId),
+    resolveWorkspaceUrl(originalUrl),
+  ]);
 
   const markdown = buildThreadMarkdown({
     messages,
@@ -19,6 +24,8 @@ export async function fetchAndBuildThread(
     channelIsPrivate: channel.isPrivate,
     originalUrl,
     users,
+    channelId,
+    workspaceUrl,
   });
 
   return { markdown, messageCount: messages.length };
@@ -44,7 +51,10 @@ export async function fetchAndBuildChannel(
     resolvedPrivate = channel.isPrivate;
   }
 
-  const users = await loadAndEnrichUsers(fetched.messages);
+  const [users, workspaceUrl] = await Promise.all([
+    loadAndEnrichUsers(fetched.messages),
+    resolveWorkspaceUrl(originalUrl),
+  ]);
 
   const markdown = buildChannelMarkdown({
     messages: fetched.messages,
@@ -54,6 +64,8 @@ export async function fetchAndBuildChannel(
     users,
     rangeLabel,
     truncated: fetched.truncated,
+    channelId,
+    workspaceUrl,
   });
 
   return { markdown, truncated: fetched.truncated, messageCount: fetched.messages.length };
