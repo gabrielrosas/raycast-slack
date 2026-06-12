@@ -22,8 +22,9 @@ const ERROR_HINTS: Record<string, string> = {
 };
 
 const PRESETS: { value: Exclude<RangeType, "custom">; title: string; subtitle: string; icon: Icon }[] = [
+  { value: "today", title: "Hoje", subtitle: "Desde 00:00 até agora", icon: Icon.Sun },
   { value: "unread", title: "Não lidas", subtitle: "Desde a última leitura", icon: Icon.Envelope },
-  { value: "24h", title: "Últimas 24h", subtitle: "Hoje e ontem", icon: Icon.Clock },
+  { value: "24h", title: "Últimas 24h", subtitle: "Últimas 24 horas corridas", icon: Icon.Clock },
   { value: "7d", title: "Últimos 7 dias", subtitle: "1 semana", icon: Icon.Calendar },
   { value: "30d", title: "Últimos 30 dias", subtitle: "1 mês", icon: Icon.Calendar },
 ];

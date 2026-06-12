@@ -18,11 +18,12 @@ const ERROR_HINTS: Record<string, string> = {
 
 const EMPTY_MARKDOWN = `# Slack Show Messages
 
-Copie a URL de uma thread OU de um canal do Slack (clique direito → **Copy link**) e abra este comando novamente.
+Copie a URL (ou o ID) de uma thread, canal ou DM do Slack e abra este comando novamente.
 
-Formatos esperados:
+Formatos aceitos:
 - Thread: \`https://{workspace}.slack.com/archives/{C…}/p…\`
 - Canal: \`https://{workspace}.slack.com/archives/{C…}\`
+- ID puro: \`C0AAPQN0UEL\` (canal/grupo) ou \`D01ABC123\` (DM)
 
 Alternativa: abra **Slack Conversations**, selecione um canal e use a ação **Show Messages**.
 `;

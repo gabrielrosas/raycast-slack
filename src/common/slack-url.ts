@@ -18,6 +18,7 @@ export type ParsedSlackUrl = ParsedThreadUrl | ParsedChannelUrl;
 
 const THREAD_PATTERN = /^https?:\/\/([a-z0-9-]+)\.slack\.com\/archives\/([A-Z0-9]+)\/p(\d+)(?:\?(.*))?$/i;
 const CHANNEL_PATTERN = /^https?:\/\/([a-z0-9-]+)\.slack\.com\/archives\/([A-Z0-9]+)\/?(?:\?.*)?$/i;
+const BARE_ID_PATTERN = /^([CDG][A-Z0-9]+)$/i;
 
 function expandTs(compact: string): string | null {
   if (compact.length < 7) return null;
@@ -50,6 +51,17 @@ export function parseSlackMessageUrl(input: string | null | undefined): ParsedSl
   if (channelMatch) {
     const [, workspace, channelId] = channelMatch;
     return { kind: "channel", workspace, channelId, originalUrl: trimmed };
+  }
+
+  const idMatch = trimmed.match(BARE_ID_PATTERN);
+  if (idMatch) {
+    const channelId = idMatch[1].toUpperCase();
+    return {
+      kind: "channel",
+      workspace: "",
+      channelId,
+      originalUrl: `slack://channel?id=${channelId}`,
+    };
   }
 
   return null;

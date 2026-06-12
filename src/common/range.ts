@@ -1,12 +1,14 @@
 import { dayjs } from "../config/dayjs";
 import { getChannelLastRead } from "./api/conversations";
 
-export type RangeType = "24h" | "7d" | "30d" | "unread" | "custom";
+export type RangeType = "today" | "24h" | "7d" | "30d" | "unread" | "custom";
 
 export type ComputedRange = { oldest?: string; latest?: string };
 
 export function rangeLabelFor(type: RangeType, oldest?: string, latest?: string): string {
   switch (type) {
+    case "today":
+      return "hoje";
     case "24h":
       return "últimas 24h";
     case "7d":
@@ -30,6 +32,8 @@ export async function computeRange(
   latestDate?: Date,
 ): Promise<ComputedRange> {
   switch (type) {
+    case "today":
+      return { oldest: String(dayjs().startOf("day").unix()) };
     case "24h":
       return { oldest: String(dayjs().subtract(24, "hour").unix()) };
     case "7d":
