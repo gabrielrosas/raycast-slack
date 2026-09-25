@@ -1,5 +1,5 @@
 import ConversationsList from "./components/conversations-list";
 
 export default function Command() {
-  return <ConversationsList />;
+  return <ConversationsList initialType="im" />;
 }

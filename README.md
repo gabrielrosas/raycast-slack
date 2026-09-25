@@ -9,7 +9,8 @@ Quick launcher for Slack conversations + a viewer that turns threads and channel
 - **Slack Conversation Tags** — Create, edit and delete tags to organize your conversations. Assign multiple tags to any conversation.
 - **Slack Sync** — Background command that syncs conversations and users from Slack every 10 minutes and refreshes unread counts.
 - Fuzzy search across conversation names, topics, IDs and tags (accent and case insensitive, multi-term).
-- Filter conversations by tag via dropdown.
+- Filter conversations by type (DMs, group DMs, channels) or by tag, via the dropdown in the search bar.
+- **Slack DMs / Group DMs / Channels** — the same list, opening with the type filter already applied. Assign a global hotkey to each in Raycast Settings → Extensions to jump straight to one kind of conversation. The filter is only pre-selected, so the dropdown still lets you switch.
 - Conversations sorted by last used.
 - Detail panel for group DMs showing the list of members (toggle with `Opt+D`).
 
@@ -42,6 +43,9 @@ AI features (Summarize, Translate, Ask AI) require Raycast Pro.
 | Command | Description | Mode |
 |---|---|---|
 | Slack Conversations | Search and open conversations | View |
+| Slack DMs | Same list, pre-filtered to direct messages | View |
+| Slack Group DMs | Same list, pre-filtered to group DMs | View |
+| Slack Channels | Same list, pre-filtered to public + private channels | View |
 | Slack Conversation Tags | Create and manage tags | View |
 | Slack Show Messages | Show messages from a thread / channel as Markdown | View |
 | Slack Following | Track followed conversations and unread counts | View |

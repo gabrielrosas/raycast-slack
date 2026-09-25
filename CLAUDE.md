@@ -10,12 +10,16 @@ Commands live at `src/` root (Raycast convention — file name = command `name` 
 
 ```
 src/
-├── conversations.tsx         # Slack Conversations — searchable list + actions
+├── conversations.tsx         # Slack Conversations — 3-line wrapper over ConversationsList
+├── dms.tsx                   # Slack DMs — wrapper, initialType="im"
+├── group-dms.tsx             # Slack Group DMs — wrapper, initialType="mpim"
+├── channels.tsx              # Slack Channels — wrapper, initialType="channels"
 ├── messages.tsx              # Slack Show Messages — entry point, branches on URL kind
 ├── unread.tsx                # Slack Following — followed conversations + unread tracking
 ├── tags.tsx                  # Slack Conversation Tags
 ├── sync.ts                   # Background sync (every 10min)
 ├── components/
+│   ├── conversations-list.tsx # The actual list: search, type/tag filter, tags, follow/ignore, actions
 │   ├── range-picker.tsx      # List of presets (Hoje, Não lidas, 24h, 7d, 30d, Customizado) + push-based Detail
 │   ├── messages-detail.tsx   # Detail with actions: Copy / Export / Ask AI / Translate / Summarize
 │   ├── summary.tsx           # AI summary view (structured Markdown output)
@@ -53,6 +57,7 @@ config/
 
 ## Conventions
 
+- **One list, many commands**: `components/conversations-list.tsx` holds all the list logic. Each root command is a wrapper passing `initialType`, which only *pre-selects* the dropdown filter — the user can still change it. To add another pre-filtered command: new wrapper in `src/`, new entry in `package.json` `commands` (the `name` must match the filename). Tags can't become commands — they're created at runtime, `package.json` is static.
 - **Token + Default Language** live in Raycast Preferences (`token` is `password` type, `defaultLanguage` is `dropdown`). Never hardcode secrets.
 - **HTTP**: single shared `slackAxios` instance with the bearer pre-set in headers. Don't import `axios` directly in feature code; import `slackAxios` from `common/api/client.ts`.
 - **Errors**: API functions throw `SlackApiError` with the Slack `error` code (e.g. `not_in_channel`, `missing_scope`). Callers map to user-friendly hints via local `ERROR_HINTS` maps.

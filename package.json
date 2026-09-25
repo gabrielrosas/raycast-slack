@@ -43,6 +43,27 @@
       "mode": "view"
     },
     {
+      "name": "dms",
+      "title": "Slack DMs",
+      "description": "Search and open Slack direct messages",
+      "icon": "conversations-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "group-dms",
+      "title": "Slack Group DMs",
+      "description": "Search and open Slack group direct messages",
+      "icon": "conversations-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "channels",
+      "title": "Slack Channels",
+      "description": "Search and open Slack public and private channels",
+      "icon": "conversations-icon.png",
+      "mode": "view"
+    },
+    {
       "name": "unread",
       "title": "Slack Following",
       "description": "Followed conversations with unread tracking",
