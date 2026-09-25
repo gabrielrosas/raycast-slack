@@ -49,6 +49,26 @@ function scoreMatch(query: string, conversation: Conversation, tagNames: string[
   return score;
 }
 
+const FILTER_ALL = "all";
+const TYPE_PREFIX = "type:";
+const TAG_PREFIX = "tag:";
+
+const CONVERSATION_TYPES: { value: Conversation["type"]; title: string; icon: Icon; color: Color }[] = [
+  { value: "im", title: "DMs", icon: Icon.Person, color: Color.SecondaryText },
+  { value: "mpim", title: "Group DMs", icon: Icon.TwoPeople, color: Color.Yellow },
+  { value: "channel", title: "Public Channels", icon: Icon.Hashtag, color: Color.Blue },
+  { value: "private_channel", title: "Private Channels", icon: Icon.Lock, color: Color.Red },
+];
+
+function matchesFilter(conversation: Conversation, filter: string, convTags: Record<string, string[]>): boolean {
+  if (filter === FILTER_ALL) return true;
+  if (filter.startsWith(TYPE_PREFIX)) return conversation.type === filter.slice(TYPE_PREFIX.length);
+  if (filter.startsWith(TAG_PREFIX)) {
+    return (convTags[conversation.id] || []).includes(filter.slice(TAG_PREFIX.length));
+  }
+  return true;
+}
+
 async function getConversations(): Promise<Record<string, Conversation>> {
   try {
     const conversationsJson = await LocalStorage.getItem<string>("conversations");
@@ -204,7 +224,7 @@ export default function Command() {
   const [showDetail, setShowDetail] = useState(false);
   const { data: allTags } = usePromise(getTags);
   const [convTags, setConvTags] = useState<Record<string, string[]>>({});
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<string>(FILTER_ALL);
   const [followed, setFollowed] = useState<string[]>([]);
   const [ignored, setIgnored] = useState<string[]>([]);
 
@@ -266,7 +286,7 @@ export default function Command() {
       return b.lastUsed - a.lastUsed;
     });
 
-    const filtered = filter === "all" ? all : all.filter((c) => (convTags[c.id] || []).includes(filter));
+    const filtered = all.filter((c) => matchesFilter(c, filter, convTags));
 
     if (!search) return filtered;
 
@@ -285,21 +305,31 @@ export default function Command() {
       searchBarPlaceholder="Search conversations..."
       onSearchTextChange={setSearch}
       searchBarAccessory={
-        allTags && allTags.length > 0 ? (
-          <List.Dropdown tooltip="Filter by tag" onChange={setFilter} value={filter}>
-            <List.Dropdown.Item title="All" value="all" />
+        <List.Dropdown tooltip="Filter" onChange={setFilter} value={filter}>
+          <List.Dropdown.Item title="All" value={FILTER_ALL} icon={Icon.Dot} />
+          <List.Dropdown.Section title="Type">
+            {CONVERSATION_TYPES.map((t) => (
+              <List.Dropdown.Item
+                key={t.value}
+                title={t.title}
+                value={`${TYPE_PREFIX}${t.value}`}
+                icon={{ source: t.icon, tintColor: t.color }}
+              />
+            ))}
+          </List.Dropdown.Section>
+          {allTags && allTags.length > 0 && (
             <List.Dropdown.Section title="Tags">
               {allTags.map((tag) => (
                 <List.Dropdown.Item
                   key={tag.id}
                   title={tag.name}
-                  value={tag.id}
+                  value={`${TAG_PREFIX}${tag.id}`}
                   icon={{ source: Icon.Tag, tintColor: tag.color }}
                 />
               ))}
             </List.Dropdown.Section>
-          </List.Dropdown>
-        ) : undefined
+          )}
+        </List.Dropdown>
       }
     >
       {conversations?.map((conversation) => (
@@ -319,6 +349,17 @@ export default function Command() {
           onToggleIgnore={handleToggleIgnore}
         />
       ))}
+      {!isLoading && conversations?.length === 0 && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No Conversations Found"
+          description={
+            filter === FILTER_ALL
+              ? "Try a different search term."
+              : "No conversation matches this filter. Change it in the dropdown above."
+          }
+        />
+      )}
     </List>
   );
 }
